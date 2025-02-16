@@ -29,7 +29,8 @@
             // "esri/rest/support/InterpolatePoints",
         // ], function(esriConfig, Map, MapView, FeatureLayer, InterpolatePoints, geometryService, FeatureSet, LinearUnit) {
             ], function(esriConfig, Map, MapView, FeatureLayer, geometryService, FeatureSet, LinearUnit) {
-            esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurKNQ8Ppnc1g03K1ODDn_lQoEdU_I_W8YuPOmi5tILMRToi3cfjcJdzeP6_Z63DVzdrBoNNAeR0bBJKdxRBX5VDqMtS3Nnw7d46jORM1-CGX4nF4h2an-cKutPDKTsie3GvSqdwOIg2DVjLiXWJtdxbGNlElQaRgPYWFHcQErYfLqRyet8dJIcadH-skYRRake9AXVq5CtsAqV0VHFNEai2xsZlWUXHpdOMiL5rap_lL4AT1_hsyN4RRP"
+            // esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurKNQ8Ppnc1g03K1ODDn_lQoEdU_I_W8YuPOmi5tILMRToi3cfjcJdzeP6_Z63DVzdrBoNNAeR0bBJKdxRBX5VDqMtS3Nnw7d46jORM1-CGX4nF4h2an-cKutPDKTsie3GvSqdwOIg2DVjLiXWJtdxbGNlElQaRgPYWFHcQErYfLqRyet8dJIcadH-skYRRake9AXVq5CtsAqV0VHFNEai2xsZlWUXHpdOMiL5rap_lL4AT1_hsyN4RRP"
+            esriConfig.apiKey = "AAPK81b7cca05fd44c15a03618aa1d5dd08bZ1H0FAlNGuWt3LBhlRWCK906HeAPjeUnUsp30Hja37HR_MwAO3BPqQO2D-rMlJTE"
             // Create the map
             const map = new Map({
                 basemap: "topo-vector"
@@ -45,9 +46,7 @@
 
             // Load Feature Layer (points to interpolate)
             const featureLayer = new FeatureLayer({
-                // https://uw-mad.maps.arcgis.com/home/item.html?id=02f41cd809f14f539588a8117f57ccc0&view=service
                 url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Nitrate/FeatureServer/0"
-                // url: "https://services.arcgis.com/your_feature_layer_url"
             });
 
             map.add(featureLayer);
