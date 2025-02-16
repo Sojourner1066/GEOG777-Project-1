@@ -1,161 +1,81 @@
 <!DOCTYPE html>
- <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
-   
-    <title>GEOG777 Project 1</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcGIS JS API - IDW Interpolation</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.29/"></script>
     <style>
-      html,
-      body,
-      #viewDiv {
-       padding: 0;
-       margin: 0;
-       height: 100%;
-       width: 100%;
-      }
-      .addRecordBtn {
-        position: absolute;
-        z-index: 10;
-        top: 10px;
-        right: 10px;
-        background-color: #0079c1;
-        color: white;
-        padding: 8px 16px;
-        border: none;
-        border-radius: 4px;
-        font-size: 14px;
-        cursor: pointer;
-        text-decoration: none;
-      }
-
-      .addRecordBtn:hover {
-        background-color: #005a87;
-      }
-     </style>
-
-    <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" />
-    <script src="https://js.arcgis.com/4.26/"></script>
-
-    <script>
-      // Load the required esri widgets for creating a webmap
-      require(["esri/config",
-               "esri/Map",
-               "esri/views/MapView",
-               "esri/widgets/Locate",
-               "esri/widgets/Search",
-               "esri/layers/FeatureLayer",
-               "esri/widgets/Legend",
-               "esri/layers/support/FeatureReductionCluster"
-             ],(esriConfig, Map, MapView, Locate, Search, FeatureLayer,Legend,FeatureReductionCluster) => {
-        
-        // connect to API key. To adjust what services are connected to this key manage them via ArcGIS Online
-        esriConfig.apiKey = "AAPK81b7cca05fd44c15a03618aa1d5dd08bZ1H0FAlNGuWt3LBhlRWCK906HeAPjeUnUsp30Hja37HR_MwAO3BPqQO2D-rMlJTE"
-        
-        // create a map object with a basemap
-        const map = new Map({
-          basemap: "dark-gray-vector"
-        });
-
-        // create a mapview with a center on Africa and zoom to see most of the land mass
-        const view = new MapView({
-          map: map,// References the map object
-          center: [-90.1336,44.4445],  // Longitude, latitude
-          zoom: 7, // Zoom level
-          container: "viewDiv" // Reference to the DOM node that will contain the view
-        });
-        
-        // Add a Locate widget so users can zoom to the location of their device
-        const locateBtn = new Locate({
-          view: view
-        });
-
-        // Add the locate widget to the top left corner of the view
-        view.ui.add(locateBtn, {
-          position: "top-left"
-        });
-
-        // Add a search widge so users can look up places
-        const searchWidget = new Search({
-          view: view
-        });
-        // Adds the search widget below other elements
-        view.ui.add(searchWidget, {
-          position: "bottom-left",
-          index: 2
-        });
-
-        // Define a pop-up for OpenStreetMap tourist data
-      // const popupOSM = {
-      //   "title": "Tourist Locations",
-      //   "content": "<b>Name:</b>{name} / {name_en}<br><b>Address:</b>{addr_street}<br>{addr_housenumber}<br>{addr_unit}<br>{addr_city}<br>{addr_postcode}<br>{addr_country}<br><b>Opening Hours:</b>{opening_hours}<br>"
-      // }
-      // // Create new feature layer object using clustering to reduse the number of points shown. 
-      // const clusteredTourist = new FeatureLayer({
-      //   url: "https://services-eu1.arcgis.com/zci5bUiJ8olAal7N/ArcGIS/rest/services/OSM_AF_Tourism/FeatureServer/0",
-      //   // set the scale when the culstered layer will turn on and off
-      //   minScale: 0,
-      //   maxScale: 100000,
-      //   // use featureReduction to limit the number of points and to have a popup that shows the count of points
-      //   featureReduction: {
-      //     type: "cluster",
-      //     clusterRadius: "120px", // Adjust the cluster radius as needed
-      //     popupTemplate: {
-      //       title: "Cluster Summary",
-      //       content: "This cluster contains <b>{cluster_count}</b> tourist points of interest. Zoom in to see more detail.",
-      //     },
-      //     symbol: {
-      //       type: "simple-marker",
-      //       style: "circle",
-      //       color: "#69dcff",
-      //       outline: {
-      //         color: "rgba(0, 139, 174, 0.5)",
-      //         width: 6
-      //       }
-      //     },
-      //     labelingInfo: [
-      //       {
-      //         deconflictionStrategy: "none",
-      //         labelExpressionInfo: {
-      //           expression: "Text($feature.cluster_count, '#,###')"
-      //         },
-      //         symbol: {
-      //           type: "text",
-      //           color: "white",
-      //           haloSize: 1,
-      //           haloColor: "black"
-      //         },
-      //         labelPlacement: "center-center"
-      //       }
-      //     ]
-      //   }
-
-      // });
-      // map.add(clusteredTourist);
-      
-      // // add the same layer without clustering to allow users to see all the data about the objects at larger scales
-      // const touristOSMinAfrica = new FeatureLayer({
-      //   url: "https://services-eu1.arcgis.com/zci5bUiJ8olAal7N/ArcGIS/rest/services/OSM_AF_Tourism/FeatureServer/0",
-      //   outFields: ["addr_city", "addr_country", "addr_housenumber", "addr_postcode", "addr_street", "addr_unit",
-      //               "amenity", "attraction", "description", "historic", "information", "name", "name_en", 
-      //               "opening_hours", "operator", "phone", "tourism", "website"],
-      //   popupTemplate: popupOSM,
-        
-      // });
-      // map.add(touristOSMinAfrica);
-      
-      // // Add a legend showing both the clusters and the points
-      // const legend = new Legend({
-      //   view: view,
-      //   layerInfos: [{ layer: clusteredTourist, title: "Tourist Points of Interest" },{ layer: touristOSMinAfrica, title: "Tourist Points of Interest" }]
-      // });
-      // view.ui.add(legend, "bottom-right");       
-      });
-    </script>
-
-  </head>
-  <body>
+        html, body, #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+        }
+    </style>
+</head>
+<body>
     <div id="viewDiv"></div>
-    <a href="data_collection.html"target="_blank" class="addRecordBtn">View or Create an Event</a>
-  </body>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/rest/support/InterpolatePoints",
+            "esri/rest/geometryService",
+            "esri/rest/support/FeatureSet",
+            "esri/rest/support/LinearUnit"
+        ], function(Map, MapView, FeatureLayer, InterpolatePoints, geometryService, FeatureSet, LinearUnit) {
+
+            // Create the map
+            const map = new Map({
+                basemap: "topo-vector"
+            });
+
+            // Create the view
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [-90.1336, 44.4445], // Wisconsin Center
+                zoom: 7
+            });
+
+            // Load Feature Layer (points to interpolate)
+            const featureLayer = new FeatureLayer({
+                url: "https://services.arcgis.com/your_feature_layer_url"
+            });
+
+            map.add(featureLayer);
+
+            // Perform IDW Interpolation
+            function runIDWInterpolation() {
+                const params = {
+                    inputLayer: featureLayer,
+                    field: "your_field_name",  // The field to interpolate
+                    method: "IDW",  // Inverse Distance Weighting
+                    outputCellSize: new LinearUnit({
+                        distance: 5000,
+                        units: "meters"
+                    })
+                };
+
+                InterpolatePoints.execute(params)
+                    .then((result) => {
+                        console.log("Interpolation Result:", result);
+                        map.add(result.outputLayer);
+                    })
+                    .catch((error) => {
+                        console.error("Error running IDW Interpolation:", error);
+                    });
+            }
+
+            // Run IDW after loading
+            view.when(() => {
+                runIDWInterpolation();
+            });
+
+        });
+    </script>
+</body>
 </html>
