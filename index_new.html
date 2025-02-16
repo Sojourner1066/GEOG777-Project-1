@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcGIS JS API - IDW Interpolation</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <style>
+        html, body, #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+        }
+    </style>
+</head>
+<body>
+    <div id="viewDiv"></div>
+    <script>
+        require([
+            "esri/config",
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/tasks/Geoprocessor",
+            "esri/layers/GraphicsLayer"            
+        ], function(Map, MapView, FeatureLayer, Geoprocessor, GraphicsLayer,esriConfig) {
+
+            // esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurKNQ8Ppnc1g03K1ODDn_lQoEdU_I_W8YuPOmi5tILMRToi3cfjcJdzeP6_Z63DVzdrBoNNAeR0bBJKdxRBX5VDqMtS3Nnw7d46jORM1-CGX4nF4h2an-cKutPDKTsie3GvSqdwOIg2DVjLiXWJtdxbGNlElQaRgPYWFHcQErYfLqRyet8dJIcadH-skYRRake9AXVq5CtsAqV0VHFNEai2xsZlWUXHpdOMiL5rap_lL4AT1_hsyN4RRP"
+            esriConfig.apiKey = "AAPK81b7cca05fd44c15a03618aa1d5dd08bZ1H0FAlNGuWt3LBhlRWCK906HeAPjeUnUsp30Hja37HR_MwAO3BPqQO2D-rMlJTE"
+
+            // Create the map
+            const map = new Map({
+                basemap: "topo-vector"
+            });
+
+            // Create the view
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [-90.1336, 44.4445], // Wisconsin
+                zoom: 7
+            });
+
+            // Add a Feature Layer (points to interpolate)
+            const featureLayer = new FeatureLayer({
+                url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Nitrate/FeatureServer/0"
+            });
+
+            map.add(featureLayer);
+
+            // Set up Geoprocessing Tool for IDW Interpolation
+            const gpServiceUrl = "https://analysis.arcgis.com/arcgis/rest/services/InterpolatePoints/GPServer/InterpolatePoints";
+            const geoprocessor = new Geoprocessor(gpServiceUrl);
+
+            // Run IDW Interpolation
+            function runIDWInterpolation() {
+                const params = {
+                    "InputLayer": featureLayer.url,  // URL of feature layer
+                    "Field": "nitrate_level",  // Change to your attribute field
+                    "Method": "IDW",
+                    "OutputName": "InterpolatedNitrateSurface"
+                };
+
+                geoprocessor.submitJob(params).then((jobInfo) => {
+                    console.log("IDW Job Submitted:", jobInfo);
+                    checkJobStatus(jobInfo.jobId);
+                });
+            }
+
+            // Check job status and retrieve results
+            function checkJobStatus(jobId) {
+                geoprocessor.waitForJobCompletion(jobId).then(() => {
+                    geoprocessor.getResultData(jobId, "OutputRaster").then((result) => {
+                        console.log("IDW Interpolation Complete:", result);
+                        map.add(result.value); // Add the raster result to the map
+                    });
+                });
+            }
+
+            // Run IDW when the view loads
+            view.when(() => {
+                // runIDWInterpolation();
+            });
+
+        });
+    </script>
+</body>
+</html>
