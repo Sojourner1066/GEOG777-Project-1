@@ -19,6 +19,7 @@
     <div id="viewDiv"></div>
     <script>
         require([
+            "esri/config",
             "esri/Map",
             "esri/views/MapView",
             "esri/layers/FeatureLayer",
@@ -26,8 +27,8 @@
             "esri/rest/geometryService",
             "esri/rest/support/FeatureSet",
             "esri/rest/support/LinearUnit"
-        ], function(Map, MapView, FeatureLayer, InterpolatePoints, geometryService, FeatureSet, LinearUnit) {
-
+        ], function(esriConfig, Map, MapView, FeatureLayer, InterpolatePoints, geometryService, FeatureSet, LinearUnit) {
+            esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurKNQ8Ppnc1g03K1ODDn_lQoEdU_I_W8YuPOmi5tILMRToi3cfjcJdzeP6_Z63DVzdrBoNNAeR0bBJKdxRBX5VDqMtS3Nnw7d46jORM1-CGX4nF4h2an-cKutPDKTsie3GvSqdwOIg2DVjLiXWJtdxbGNlElQaRgPYWFHcQErYfLqRyet8dJIcadH-skYRRake9AXVq5CtsAqV0VHFNEai2xsZlWUXHpdOMiL5rap_lL4AT1_hsyN4RRP"
             // Create the map
             const map = new Map({
                 basemap: "topo-vector"
@@ -43,7 +44,9 @@
 
             // Load Feature Layer (points to interpolate)
             const featureLayer = new FeatureLayer({
-                url: "https://services.arcgis.com/your_feature_layer_url"
+                // https://uw-mad.maps.arcgis.com/home/item.html?id=02f41cd809f14f539588a8117f57ccc0&view=service
+                url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Nitrate/FeatureServer/0"
+                // url: "https://services.arcgis.com/your_feature_layer_url"
             });
 
             map.add(featureLayer);
@@ -52,10 +55,10 @@
             function runIDWInterpolation() {
                 const params = {
                     inputLayer: featureLayer,
-                    field: "your_field_name",  // The field to interpolate
+                    field: "nitr_ran",  // The field to interpolate
                     method: "IDW",  // Inverse Distance Weighting
                     outputCellSize: new LinearUnit({
-                        distance: 5000,
+                        distance: 500000,
                         units: "meters"
                     })
                 };
