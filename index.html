@@ -86,70 +86,70 @@
         });
 
         // Define a pop-up for OpenStreetMap tourist data
-      const popupOSM = {
-        "title": "Tourist Locations",
-        "content": "<b>Name:</b>{name} / {name_en}<br><b>Address:</b>{addr_street}<br>{addr_housenumber}<br>{addr_unit}<br>{addr_city}<br>{addr_postcode}<br>{addr_country}<br><b>Opening Hours:</b>{opening_hours}<br>"
-      }
-      // Create new feature layer object using clustering to reduse the number of points shown. 
-      const clusteredTourist = new FeatureLayer({
-        url: "https://services-eu1.arcgis.com/zci5bUiJ8olAal7N/ArcGIS/rest/services/OSM_AF_Tourism/FeatureServer/0",
-        // set the scale when the culstered layer will turn on and off
-        minScale: 0,
-        maxScale: 100000,
-        // use featureReduction to limit the number of points and to have a popup that shows the count of points
-        featureReduction: {
-          type: "cluster",
-          clusterRadius: "120px", // Adjust the cluster radius as needed
-          popupTemplate: {
-            title: "Cluster Summary",
-            content: "This cluster contains <b>{cluster_count}</b> tourist points of interest. Zoom in to see more detail.",
-          },
-          symbol: {
-            type: "simple-marker",
-            style: "circle",
-            color: "#69dcff",
-            outline: {
-              color: "rgba(0, 139, 174, 0.5)",
-              width: 6
-            }
-          },
-          labelingInfo: [
-            {
-              deconflictionStrategy: "none",
-              labelExpressionInfo: {
-                expression: "Text($feature.cluster_count, '#,###')"
-              },
-              symbol: {
-                type: "text",
-                color: "white",
-                haloSize: 1,
-                haloColor: "black"
-              },
-              labelPlacement: "center-center"
-            }
-          ]
-        }
+      // const popupOSM = {
+      //   "title": "Tourist Locations",
+      //   "content": "<b>Name:</b>{name} / {name_en}<br><b>Address:</b>{addr_street}<br>{addr_housenumber}<br>{addr_unit}<br>{addr_city}<br>{addr_postcode}<br>{addr_country}<br><b>Opening Hours:</b>{opening_hours}<br>"
+      // }
+      // // Create new feature layer object using clustering to reduse the number of points shown. 
+      // const clusteredTourist = new FeatureLayer({
+      //   url: "https://services-eu1.arcgis.com/zci5bUiJ8olAal7N/ArcGIS/rest/services/OSM_AF_Tourism/FeatureServer/0",
+      //   // set the scale when the culstered layer will turn on and off
+      //   minScale: 0,
+      //   maxScale: 100000,
+      //   // use featureReduction to limit the number of points and to have a popup that shows the count of points
+      //   featureReduction: {
+      //     type: "cluster",
+      //     clusterRadius: "120px", // Adjust the cluster radius as needed
+      //     popupTemplate: {
+      //       title: "Cluster Summary",
+      //       content: "This cluster contains <b>{cluster_count}</b> tourist points of interest. Zoom in to see more detail.",
+      //     },
+      //     symbol: {
+      //       type: "simple-marker",
+      //       style: "circle",
+      //       color: "#69dcff",
+      //       outline: {
+      //         color: "rgba(0, 139, 174, 0.5)",
+      //         width: 6
+      //       }
+      //     },
+      //     labelingInfo: [
+      //       {
+      //         deconflictionStrategy: "none",
+      //         labelExpressionInfo: {
+      //           expression: "Text($feature.cluster_count, '#,###')"
+      //         },
+      //         symbol: {
+      //           type: "text",
+      //           color: "white",
+      //           haloSize: 1,
+      //           haloColor: "black"
+      //         },
+      //         labelPlacement: "center-center"
+      //       }
+      //     ]
+      //   }
 
-      });
-      map.add(clusteredTourist);
+      // });
+      // map.add(clusteredTourist);
       
-      // add the same layer without clustering to allow users to see all the data about the objects at larger scales
-      const touristOSMinAfrica = new FeatureLayer({
-        url: "https://services-eu1.arcgis.com/zci5bUiJ8olAal7N/ArcGIS/rest/services/OSM_AF_Tourism/FeatureServer/0",
-        outFields: ["addr_city", "addr_country", "addr_housenumber", "addr_postcode", "addr_street", "addr_unit",
-                    "amenity", "attraction", "description", "historic", "information", "name", "name_en", 
-                    "opening_hours", "operator", "phone", "tourism", "website"],
-        popupTemplate: popupOSM,
+      // // add the same layer without clustering to allow users to see all the data about the objects at larger scales
+      // const touristOSMinAfrica = new FeatureLayer({
+      //   url: "https://services-eu1.arcgis.com/zci5bUiJ8olAal7N/ArcGIS/rest/services/OSM_AF_Tourism/FeatureServer/0",
+      //   outFields: ["addr_city", "addr_country", "addr_housenumber", "addr_postcode", "addr_street", "addr_unit",
+      //               "amenity", "attraction", "description", "historic", "information", "name", "name_en", 
+      //               "opening_hours", "operator", "phone", "tourism", "website"],
+      //   popupTemplate: popupOSM,
         
-      });
-      map.add(touristOSMinAfrica);
+      // });
+      // map.add(touristOSMinAfrica);
       
-      // Add a legend showing both the clusters and the points
-      const legend = new Legend({
-        view: view,
-        layerInfos: [{ layer: clusteredTourist, title: "Tourist Points of Interest" },{ layer: touristOSMinAfrica, title: "Tourist Points of Interest" }]
-      });
-      view.ui.add(legend, "bottom-right");       
+      // // Add a legend showing both the clusters and the points
+      // const legend = new Legend({
+      //   view: view,
+      //   layerInfos: [{ layer: clusteredTourist, title: "Tourist Points of Interest" },{ layer: touristOSMinAfrica, title: "Tourist Points of Interest" }]
+      // });
+      // view.ui.add(legend, "bottom-right");       
       });
     </script>
 
