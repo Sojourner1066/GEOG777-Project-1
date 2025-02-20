@@ -25,9 +25,9 @@
             "esri/Map",
             "esri/views/MapView",
             "esri/layers/FeatureLayer",
-            "esri/rest/geoprocessor"           
-        // ], function(esriConfig, Map, MapView, FeatureLayer, Geoprocessor, GraphicsLayer) {
-        ], function(OAuthInfo, IdentityManager, Map, MapView, FeatureLayer, Geoprocessor) {
+            "esri/rest/geoprocessor",
+            "esri/rest/support/FeatureSet"           
+        ], function(OAuthInfo, IdentityManager, Map, MapView, FeatureLayer, Geoprocessor, FeatureSet) {
             
             // 🔹 Step 1: Set Up OAuth Authentication
             const info = new OAuthInfo({
