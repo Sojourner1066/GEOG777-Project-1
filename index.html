@@ -60,7 +60,7 @@
                 // 🔹 Convert Feature Layer to FeatureSet for the GP tool
                 const query = featureLayer.createQuery();
                 query.where = "1=1"; // Get all features
-                query.outFields = ["nitrate_level"]; // Replace with your actual field name
+                query.outFields = ["nitr_ran"];
                 query.returnGeometry = true;
                 console.log("Query Constructed...");
 
@@ -69,13 +69,15 @@
                     features: await featureLayer.queryFeatures(query).then((res) => res.features)
                 });
 
+                console.log("Building parameters for GP tool...");
                 // 🔹 Define parameters for the GP tool
                 const params = {
                     "InputLayer": featureSet,
-                    "Field": "nitrate_level", // Change this to the correct field
+                    "Field": "nitr_ran", 
                     "Method": "IDW"
                 };
 
+                console.log("Submitting Job...");
                 // 🔹 Submit the GP job
                 const gpJob = await geoprocessor.submitJob(gpServiceUrl, params);
                 console.log("GP Job Submitted:", gpJob);
