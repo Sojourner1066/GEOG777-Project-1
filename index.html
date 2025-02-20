@@ -52,7 +52,7 @@
 
             // Set up Geoprocessing Tool for IDW Interpolation
             const gpServiceUrl = "https://analysis.arcgis.com/arcgis/rest/services/InterpolatePoints/GPServer/InterpolatePoints";
-            const GeoProcessor = new geoprocessor(gpServiceUrl);
+            const geoprocessor = new Geoprocessor(gpServiceUrl);
 
             // // Run IDW Interpolation
             // function runIDWInterpolation() {
@@ -63,7 +63,7 @@
             //         "OutputName": "InterpolatedNitrateSurface"
             //     };
 
-            //     GeoProcessor.submitJob(params).then((jobInfo) => {
+            //     geoprocessor.submitJob(params).then((jobInfo) => {
             //         console.log("IDW Job Submitted:", jobInfo);
             //         checkJobStatus(jobInfo.jobId);
             //     });
@@ -71,8 +71,8 @@
 
             // // Check job status and retrieve results
             // function checkJobStatus(jobId) {
-            //     GeoProcessor.waitForJobCompletion(jobId).then(() => {
-            //         GeoProcessor.getResultData(jobId, "OutputRaster").then((result) => {
+            //     geoprocessor.waitForJobCompletion(jobId).then(() => {
+            //         geoprocessor.getResultData(jobId, "OutputRaster").then((result) => {
             //             console.log("IDW Interpolation Complete:", result);
             //             map.add(result.value); // Add the raster result to the map
             //         });
