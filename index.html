@@ -18,73 +18,88 @@
 <body>
     <div id="viewDiv"></div>
     <script>
-        require([
-            "esri/config",
-            "esri/Map",
-            "esri/views/MapView",
-            "esri/layers/FeatureLayer",
-            "esri/rest/geoprocessor",
-            "esri/layers/GraphicsLayer"            
-        ], function(esriConfig, Map, MapView, FeatureLayer, Geoprocessor, GraphicsLayer) {
+    require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/rest/geoprocessor",
+        "esri/rest/support/FeatureSet"
+    ], function(Map, MapView, FeatureLayer, geoprocessor, FeatureSet) {
 
-            // esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurKNQ8Ppnc1g03K1ODDn_lQoEdU_I_W8YuPOmi5tILMRToi3cfjcJdzeP6_Z63DVzdrBoNNAeR0bBJKdxRBX5VDqMtS3Nnw7d46jORM1-CGX4nF4h2an-cKutPDKTsie3GvSqdwOIg2DVjLiXWJtdxbGNlElQaRgPYWFHcQErYfLqRyet8dJIcadH-skYRRake9AXVq5CtsAqV0VHFNEai2xsZlWUXHpdOMiL5rap_lL4AT1_hsyN4RRP"
-            esriConfig.apiKey = "AAPK81b7cca05fd44c15a03618aa1d5dd08bZ1H0FAlNGuWt3LBhlRWCK906HeAPjeUnUsp30Hja37HR_MwAO3BPqQO2D-rMlJTE"
-
-            // Create the map
-            const map = new Map({
-                basemap: "dark-gray-vector"
-            });
-
-            // Create the view
-            const view = new MapView({
-                container: "viewDiv",
-                map: map,
-                center: [-90.1336, 44.4445], // Wisconsin
-                zoom: 6
-            });
-
-            // Add a Feature Layer (points to interpolate)
-            const featureLayer = new FeatureLayer({
-                url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Nitrate/FeatureServer/0"
-            });
-
-            map.add(featureLayer);
-
-            // Set up Geoprocessing Tool for IDW Interpolation
-            const gpServiceUrl = "https://analysis.arcgis.com/arcgis/rest/services/InterpolatePoints/GPServer/InterpolatePoints";
-            const test = new Geoprocessor(gpServiceUrl);
-
-            // // Run IDW Interpolation
-            // function runIDWInterpolation() {
-            //     const params = {
-            //         "InputLayer": featureLayer.url,  // URL of feature layer
-            //         "Field": "nitrate_level",  // Change to your attribute field
-            //         "Method": "IDW",
-            //         "OutputName": "InterpolatedNitrateSurface"
-            //     };
-
-            //     geoprocessor.submitJob(params).then((jobInfo) => {
-            //         console.log("IDW Job Submitted:", jobInfo);
-            //         checkJobStatus(jobInfo.jobId);
-            //     });
-            // }
-
-            // // Check job status and retrieve results
-            // function checkJobStatus(jobId) {
-            //     geoprocessor.waitForJobCompletion(jobId).then(() => {
-            //         geoprocessor.getResultData(jobId, "OutputRaster").then((result) => {
-            //             console.log("IDW Interpolation Complete:", result);
-            //             map.add(result.value); // Add the raster result to the map
-            //         });
-            //     });
-            // }
-
-            // // Run IDW when the view loads
-            // view.when(() => {
-            //     runIDWInterpolation();
-            // });
-
+        // 🔹 Step 1: Create the Map and View
+        const map = new Map({
+            basemap: "topo-vector"
         });
+
+        const view = new MapView({
+            container: "viewDiv",
+            map: map,
+            center: [-90.1336, 44.4445], // Wisconsin
+            zoom: 7
+        });
+
+        // 🔹 Step 2: Add Feature Layer (Points to interpolate)
+        const featureLayer = new FeatureLayer({
+            url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Nitrate/FeatureServer/0"
+        });
+
+        map.add(featureLayer);
+
+        // 🔹 Step 3: Set up the Geoprocessor
+        const gpServiceUrl = "https://analysis.arcgis.com/arcgis/rest/services/InterpolatePoints/GPServer/InterpolatePoints";
+
+        // 🔹 Step 4: Run IDW Interpolation
+        async function runIDWInterpolation() {
+            try {
+                console.log("Starting IDW Interpolation...");
+
+                // 🔹 Convert Feature Layer to FeatureSet for the GP tool
+                const query = featureLayer.createQuery();
+                query.where = "1=1"; // Get all features
+                query.outFields = ["nitrate_level"]; // Replace with your actual field name
+                query.returnGeometry = true;
+
+                const featureSet = new FeatureSet({
+                    features: await featureLayer.queryFeatures(query).then((res) => res.features)
+                });
+
+                // 🔹 Define parameters for the GP tool
+                const params = {
+                    "InputLayer": featureSet,
+                    "Field": "nitrate_level", // Change this to the correct field
+                    "Method": "IDW"
+                };
+
+                // 🔹 Submit the GP job
+                const gpJob = await geoprocessor.submitJob(gpServiceUrl, params);
+                console.log("GP Job Submitted:", gpJob);
+
+                // 🔹 Wait for the job to complete
+                await geoprocessor.waitForJobCompletion(gpServiceUrl, gpJob.jobId);
+                console.log("GP Job Completed:", gpJob.jobId);
+
+                // 🔹 Retrieve the output raster
+                const result = await geoprocessor.getResultData(gpServiceUrl, gpJob.jobId, "OutputRaster");
+                console.log("IDW Interpolation Result:", result);
+
+                // 🔹 Add the raster to the map
+                if (result && result.value) {
+                    map.add(result.value);
+                } else {
+                    console.error("No output raster found.");
+                }
+
+            } catch (error) {
+                console.error("Error running IDW interpolation:", error);
+            }
+        }
+
+        // 🔹 Step 5: Run the interpolation when the view loads
+        view.when(() => {
+            runIDWInterpolation();
+        });
+
+    });
     </script>
 </body>
 </html>

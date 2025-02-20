@@ -23,7 +23,7 @@
             "esri/Map",
             "esri/views/MapView",
             "esri/layers/FeatureLayer",
-            "esri/tasks/Geoprocessor",
+            "esri/rest/geoprocessor",
             "esri/layers/GraphicsLayer"            
         ], function(esriConfig, Map, MapView, FeatureLayer, Geoprocessor, GraphicsLayer) {
 
@@ -32,7 +32,7 @@
 
             // Create the map
             const map = new Map({
-                basemap: "topo-vector"
+                basemap: "dark-gray-vector"
             });
 
             // Create the view
@@ -40,7 +40,7 @@
                 container: "viewDiv",
                 map: map,
                 center: [-90.1336, 44.4445], // Wisconsin
-                zoom: 7
+                zoom: 6
             });
 
             // Add a Feature Layer (points to interpolate)
@@ -52,37 +52,37 @@
 
             // Set up Geoprocessing Tool for IDW Interpolation
             const gpServiceUrl = "https://analysis.arcgis.com/arcgis/rest/services/InterpolatePoints/GPServer/InterpolatePoints";
-            const geoprocessor = new Geoprocessor(gpServiceUrl);
+            const test = new Geoprocessor(gpServiceUrl);
 
-            // Run IDW Interpolation
-            function runIDWInterpolation() {
-                const params = {
-                    "InputLayer": featureLayer.url,  // URL of feature layer
-                    "Field": "nitrate_level",  // Change to your attribute field
-                    "Method": "IDW",
-                    "OutputName": "InterpolatedNitrateSurface"
-                };
+            // // Run IDW Interpolation
+            // function runIDWInterpolation() {
+            //     const params = {
+            //         "InputLayer": featureLayer.url,  // URL of feature layer
+            //         "Field": "nitrate_level",  // Change to your attribute field
+            //         "Method": "IDW",
+            //         "OutputName": "InterpolatedNitrateSurface"
+            //     };
 
-                geoprocessor.submitJob(params).then((jobInfo) => {
-                    console.log("IDW Job Submitted:", jobInfo);
-                    checkJobStatus(jobInfo.jobId);
-                });
-            }
+            //     geoprocessor.submitJob(params).then((jobInfo) => {
+            //         console.log("IDW Job Submitted:", jobInfo);
+            //         checkJobStatus(jobInfo.jobId);
+            //     });
+            // }
 
-            // Check job status and retrieve results
-            function checkJobStatus(jobId) {
-                geoprocessor.waitForJobCompletion(jobId).then(() => {
-                    geoprocessor.getResultData(jobId, "OutputRaster").then((result) => {
-                        console.log("IDW Interpolation Complete:", result);
-                        map.add(result.value); // Add the raster result to the map
-                    });
-                });
-            }
+            // // Check job status and retrieve results
+            // function checkJobStatus(jobId) {
+            //     geoprocessor.waitForJobCompletion(jobId).then(() => {
+            //         geoprocessor.getResultData(jobId, "OutputRaster").then((result) => {
+            //             console.log("IDW Interpolation Complete:", result);
+            //             map.add(result.value); // Add the raster result to the map
+            //         });
+            //     });
+            // }
 
-            // Run IDW when the view loads
-            view.when(() => {
-                // runIDWInterpolation();
-            });
+            // // Run IDW when the view loads
+            // view.when(() => {
+            //     runIDWInterpolation();
+            // });
 
         });
     </script>
