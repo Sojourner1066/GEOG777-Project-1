@@ -29,25 +29,6 @@
         // ], function(esriConfig, Map, MapView, FeatureLayer, Geoprocessor, GraphicsLayer) {
         ], function(OAuthInfo, IdentityManager, Map, MapView, FeatureLayer, Geoprocessor) {
             
-    // const info = new OAuthInfo({
-    //     appId: "YOUR_CLIENT_ID",  // Replace with your ArcGIS app's Client ID
-    //     portalUrl: "https://www.arcgis.com",  // Change if using an Enterprise portal
-    //     popup: false,  // Use full-page redirect for GitHub Pages
-    //     flowType: "implicit",
-    //     redirectUri: "https://sojourner1066.github.io/GEOG777-Project-1/auth.html"  // Ensure this matches your ArcGIS settings
-    // });
-
-    // IdentityManager.registerOAuthInfos([info]);
-
-    // IdentityManager.getCredential(info.portalUrl).then((credential) => {
-    //     console.log("Authenticated Token:", credential.token);
-    // }).catch((err) => {
-    //     console.error("Authentication Error:", err);
-    // });
-
-
-
-
             // 🔹 Step 1: Set Up OAuth Authentication
             const info = new OAuthInfo({
                 appId: "Mmy7ixBbhsyN4RRP",  // Replace with your ArcGIS Client ID
@@ -62,48 +43,83 @@
             IdentityManager.getCredential(info.portalUrl).then((credential) => {
                 // console.log("User Authenticated:", credential);
                 console.log("Authenticated Token:", credential.token);
-
-                // 🔹 Step 2: Initialize the Map
+                // 🔹 Step 1: Create the Map and View
                 const map = new Map({
-                    basemap: "topo-vector"
+                    basemap: "dark-gray-vector"
                 });
 
                 const view = new MapView({
                     container: "viewDiv",
                     map: map,
                     center: [-90.1336, 44.4445], // Wisconsin
-                    zoom: 7
+                    zoom: 6
                 });
 
-                // 🔹 Step 3: Secure Feature Layer with Token
+                // 🔹 Step 2: Add Feature Layer (Points to interpolate)
                 const featureLayer = new FeatureLayer({
-                    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Nitrate/FeatureServer/0",
-                    authentication: credential
+                    url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Nitrate/FeatureServer/0"
                 });
 
                 map.add(featureLayer);
 
-                // 🔹 Step 4: Use Geoprocessor with Authentication
+                // 🔹 Step 3: Set up the Geoprocessor
                 const gpServiceUrl = "https://analysis.arcgis.com/arcgis/rest/services/InterpolatePoints/GPServer/InterpolatePoints";
-                const gp = geoprocessor.create(gpServiceUrl);
 
-                function runIDWInterpolation() {
-                    const params = {
-                        "InputLayer": featureLayer.url,
-                        "Field": "nitr_ran",
-                        "Method": "IDW",
-                        "token": credential.token  // 🔹 Attach the authentication token
-                    };
+                // 🔹 Step 4: Run IDW Interpolation
+                async function runIDWInterpolation() {
+                    try {
+                        console.log("Starting IDW Interpolation...");
 
-                    gp.submitJob(params).then((jobInfo) => {
-                        console.log("GP Job Submitted:", jobInfo);
-                    }).catch((err) => {
-                        console.error("Error submitting IDW job:", err);
-                    });
+                        // 🔹 Convert Feature Layer to FeatureSet for the GP tool
+                        const query = featureLayer.createQuery();
+                        query.where = "1=1"; // Get all features
+                        query.outFields = ["nitr_ran"];
+                        query.returnGeometry = true;
+                        console.log("Query Constructed...");
+
+                        console.log("Running Query...");
+                        const featureSet = new FeatureSet({
+                            features: await featureLayer.queryFeatures(query).then((res) => res.features)
+                        });
+
+                        console.log("Building parameters for GP tool...");
+                        // 🔹 Define parameters for the GP tool
+                        const params = {
+                            "InputLayer": featureSet,
+                            "Field": "nitr_ran", 
+                            "Method": "IDW"
+                        };
+
+                        console.log("Submitting Job...");
+                        // 🔹 Submit the GP job
+                        const gpJob = await geoprocessor.submitJob(gpServiceUrl, params);
+                        console.log("GP Job Submitted:", gpJob);
+
+                        // 🔹 Wait for the job to complete
+                        await geoprocessor.waitForJobCompletion(gpServiceUrl, gpJob.jobId);
+                        console.log("GP Job Completed:", gpJob.jobId);
+
+                        // 🔹 Retrieve the output raster
+                        const result = await geoprocessor.getResultData(gpServiceUrl, gpJob.jobId, "OutputRaster");
+                        console.log("IDW Interpolation Result:", result);
+
+                        // 🔹 Add the raster to the map
+                        if (result && result.value) {
+                            map.add(result.value);
+                        } else {
+                            console.error("No output raster found.");
+                        }
+
+                    } catch (error) {
+                        console.error("Error running IDW interpolation:", error);
+                    }
                 }
 
-                // 🔹 Run IDW after authentication
-                view.when(runIDWInterpolation);
+                // 🔹 Step 5: Run the interpolation when the view loads
+                view.when(() => {
+                    runIDWInterpolation();
+                });
+                
             }).catch((err) => {
                 console.error("OAuth Authentication Failed:", err);
             });
