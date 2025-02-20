@@ -28,17 +28,40 @@
             "esri/rest/geoprocessor"           
         // ], function(esriConfig, Map, MapView, FeatureLayer, Geoprocessor, GraphicsLayer) {
         ], function(OAuthInfo, IdentityManager, Map, MapView, FeatureLayer, Geoprocessor) {
+            
+    // const info = new OAuthInfo({
+    //     appId: "YOUR_CLIENT_ID",  // Replace with your ArcGIS app's Client ID
+    //     portalUrl: "https://www.arcgis.com",  // Change if using an Enterprise portal
+    //     popup: false,  // Use full-page redirect for GitHub Pages
+    //     flowType: "implicit",
+    //     redirectUri: "https://sojourner1066.github.io/GEOG777-Project-1/auth.html"  // Ensure this matches your ArcGIS settings
+    // });
+
+    // IdentityManager.registerOAuthInfos([info]);
+
+    // IdentityManager.getCredential(info.portalUrl).then((credential) => {
+    //     console.log("Authenticated Token:", credential.token);
+    // }).catch((err) => {
+    //     console.error("Authentication Error:", err);
+    // });
+
+
+
 
             // 🔹 Step 1: Set Up OAuth Authentication
             const info = new OAuthInfo({
                 appId: "Mmy7ixBbhsyN4RRP",  // Replace with your ArcGIS Client ID
-                popup: true  // Opens authentication popup
+                portalUrl: "https://www.arcgis.com",
+                popup: false,  // Opens authentication popup
+                flowType: "implicit",
+                redirectUri: "https://sojourner1066.github.io/GEOG777-Project-1/auth.html"  // Ensure this matches your ArcGIS settings
             });
 
             IdentityManager.registerOAuthInfos([info]);
 
             IdentityManager.getCredential(info.portalUrl).then((credential) => {
-                console.log("User Authenticated:", credential);
+                // console.log("User Authenticated:", credential);
+                console.log("Authenticated Token:", credential.token);
 
                 // 🔹 Step 2: Initialize the Map
                 const map = new Map({
@@ -84,77 +107,6 @@
             }).catch((err) => {
                 console.error("OAuth Authentication Failed:", err);
             });
-
-        });
-    </script>
-</body>
-</html>
-
-
-
-
-
-
-
-
-
-
-            // esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurKNQ8Ppnc1g03K1ODDn_lQoEdU_I_W8YuPOmi5tILMRToi3cfjcJdzeP6_Z63DVzdrBoNNAeR0bBJKdxRBX5VDqMtS3Nnw7d46jORM1-CGX4nF4h2an-cKutPDKTsie3GvSqdwOIg2DVjLiXWJtdxbGNlElQaRgPYWFHcQErYfLqRyet8dJIcadH-skYRRake9AXVq5CtsAqV0VHFNEai2xsZlWUXHpdOMiL5rap_lL4AT1_hsyN4RRP"
-            esriConfig.apiKey = "AAPK81b7cca05fd44c15a03618aa1d5dd08bZ1H0FAlNGuWt3LBhlRWCK906HeAPjeUnUsp30Hja37HR_MwAO3BPqQO2D-rMlJTE"
-
-            // Create the map
-            const map = new Map({
-                basemap: "dark-gray-vector"
-            });
-
-            // Create the view
-            const view = new MapView({
-                container: "viewDiv",
-                map: map,
-                center: [-90.1336, 44.4445], // Wisconsin
-                zoom: 6
-            });
-
-            // Add a Feature Layer (points to interpolate)
-            const featureLayer = new FeatureLayer({
-                url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Nitrate/FeatureServer/0"
-            });
-
-            map.add(featureLayer);
-
-            // Set up Geoprocessing Tool for IDW Interpolation
-            const gpServiceUrl = "https://analysis.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/InterpolatePoints/GPServer/InterpolatePoints";
-            const test = new Geoprocessor(gpServiceUrl);
-
-            // // Run IDW Interpolation
-            // function runIDWInterpolation() {
-            //     const params = {
-            //         "InputLayer": featureLayer.url,  // URL of feature layer
-            //         "Field": "nitrate_level",  // Change to your attribute field
-            //         "Method": "IDW",
-            //         "OutputName": "InterpolatedNitrateSurface"
-            //     };
-
-            //     geoprocessor.submitJob(params).then((jobInfo) => {
-            //         console.log("IDW Job Submitted:", jobInfo);
-            //         checkJobStatus(jobInfo.jobId);
-            //     });
-            // }
-
-            // // Check job status and retrieve results
-            // function checkJobStatus(jobId) {
-            //     geoprocessor.waitForJobCompletion(jobId).then(() => {
-            //         geoprocessor.getResultData(jobId, "OutputRaster").then((result) => {
-            //             console.log("IDW Interpolation Complete:", result);
-            //             map.add(result.value); // Add the raster result to the map
-            //         });
-            //     });
-            // }
-
-            // // Run IDW when the view loads
-            // view.when(() => {
-            //     runIDWInterpolation();
-            // });
 
         });
     </script>

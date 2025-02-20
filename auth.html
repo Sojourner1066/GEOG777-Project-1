@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Redirect</title>
+    <script>
+        // Extract access token from the URL fragment
+        const urlParams = new URLSearchParams(window.location.hash.substring(1));
+        const token = urlParams.get("access_token");
+
+        if (token) {
+            console.log("ArcGIS Token:", token);
+            sessionStorage.setItem("arcgis_token", token);
+
+            // Redirect to the main page after successful login
+            window.location.href = "index.html";
+        } else {
+            console.error("OAuth authentication failed.");
+            document.body.innerHTML = "<h2>Authentication Failed</h2>";
+        }
+    </script>
+</head>
+<body>
+    <h2>Authenticating, please wait...</h2>
+</body>
+</html>
