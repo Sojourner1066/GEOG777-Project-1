@@ -40,7 +40,7 @@
                 container: "viewDiv",
                 map: map,
                 center: [-90.1336, 44.4445], // Wisconsin
-                zoom: 7
+                zoom: 6
             });
 
             // Add a Feature Layer (points to interpolate)
@@ -51,8 +51,8 @@
             map.add(featureLayer);
 
             // Set up Geoprocessing Tool for IDW Interpolation
-            // const gpServiceUrl = "https://analysis.arcgis.com/arcgis/rest/services/InterpolatePoints/GPServer/InterpolatePoints";
-            // const GeoProcessor = new geoprocessor(gpServiceUrl);
+            const gpServiceUrl = "https://analysis.arcgis.com/arcgis/rest/services/InterpolatePoints/GPServer/InterpolatePoints";
+            const GeoProcessor = new geoprocessor(gpServiceUrl);
 
             // // Run IDW Interpolation
             // function runIDWInterpolation() {
