@@ -29,7 +29,7 @@
 
         // esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurKNQ8Ppnc1g03K1ODDn_lQoEdU_I_W8YuPOmi5tILMRToi3cfjcJdzeP6_Z63DVzdrBoNNAeR0bBJKdxRBX5VDqMtS3Nnw7d46jORM1-CGX4nF4h2an-cKutPDKTsie3GvSqdwOIg2DVjLiXWJtdxbGNlElQaRgPYWFHcQErYfLqRyet8dJIcadH-skYRRake9AXVq5CtsAqV0VHFNEai2xsZlWUXHpdOMiL5rap_lL4AT1_hsyN4RRP"
         esriConfig.apiKey = "AAPK81b7cca05fd44c15a03618aa1d5dd08bZ1H0FAlNGuWt3LBhlRWCK906HeAPjeUnUsp30Hja37HR_MwAO3BPqQO2D-rMlJTE"
-        
+
         // 🔹 Step 1: Create the Map and View
         const map = new Map({
             basemap: "dark-gray-vector"
@@ -62,7 +62,9 @@
                 query.where = "1=1"; // Get all features
                 query.outFields = ["nitrate_level"]; // Replace with your actual field name
                 query.returnGeometry = true;
+                console.log("Query Constructed...");
 
+                console.log("Running Query...");
                 const featureSet = new FeatureSet({
                     features: await featureLayer.queryFeatures(query).then((res) => res.features)
                 });
