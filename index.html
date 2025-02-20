@@ -28,14 +28,14 @@
 
         // 🔹 Step 1: Create the Map and View
         const map = new Map({
-            basemap: "topo-vector"
+            basemap: "dark-gray-vector"
         });
 
         const view = new MapView({
             container: "viewDiv",
             map: map,
             center: [-90.1336, 44.4445], // Wisconsin
-            zoom: 7
+            zoom: 6
         });
 
         // 🔹 Step 2: Add Feature Layer (Points to interpolate)
