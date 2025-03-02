@@ -86,9 +86,15 @@
                         console.log("Building parameters for GP tool...");
                     
                         const params = {
-                            "InputLayer": featureSet,
-                            "Field": "nitr_ran", 
-                            "Method": "IDW"
+                            inputLayer: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/Nitrate/FeatureServer/0",
+                            field: "nitr_ran",
+                            outputName: "IDW_Interpolation",
+                            interpolateOption: 9,
+                            cellSize: 100,
+                            searchRadius: 500,
+                            searchRadiusUnits: "Miles",
+                            outputType: "Raster Dataset",
+                            Method: "IDW"
                         };
 
                         console.log("Submitting Job...");
