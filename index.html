@@ -21,13 +21,14 @@
         require([
             "esri/identity/OAuthInfo",
             "esri/identity/IdentityManager",
+            // "esri/config",
             "esri/Map",
             "esri/views/MapView",
             "esri/layers/FeatureLayer",
             "esri/rest/geoprocessor",
-            "esri/rest/support/FeatureSet"
-        ], function(OAuthInfo, IdentityManager, Map, MapView, FeatureLayer, Geoprocessor, FeatureSet) {
-
+            "esri/rest/support/FeatureSet"           
+        ], function(OAuthInfo, IdentityManager, Map, MapView, FeatureLayer, geoprocessor, FeatureSet) {
+            
             // Step 1: Set Up OAuth Authentication
             const info = new OAuthInfo({
                 appId: "Mmy7ixBbhsyN4RRP",  // Replace with your ArcGIS Client ID
@@ -40,8 +41,8 @@
             IdentityManager.registerOAuthInfos([info]);
 
             IdentityManager.getCredential(info.portalUrl).then((credential) => {
+                // console.log("User Authenticated:", credential);
                 console.log("Authenticated Token:", credential.token);
-
                 // Step 1: Create the Map and View
                 const map = new Map({
                     basemap: "dark-gray-vector"
@@ -63,14 +64,14 @@
 
                 // Step 3: Set up the Geoprocessor
                 const gpServiceUrl = "https://analysis.arcgis.com/arcgis/rest/services/tasks/GPServer/InterpolatePoints/submitJob";
-                
+                // const gpServiceUrl = "https://analysis.arcgis.com/arcgis/rest/services/InterpolatePoints/GPServer/InterpolatePoints";
 
                 // Step 4: Run IDW Interpolation
                 async function runIDWInterpolation() {
                     try {
                         console.log("Starting IDW Interpolation...");
 
-                        // Convert Feature Layer to FeatureSet for the GP tool
+                        // 🔹 Convert Feature Layer to FeatureSet for the GP tool
                         const query = featureLayer.createQuery();
                         query.where = "1=1"; // Get all features
                         query.outFields = ["nitr_ran"];
@@ -83,43 +84,47 @@
                         });
 
                         console.log("Building parameters for GP tool...");
+                    
                         const params = {
                             "InputLayer": featureSet,
-                            "Field": "nitr_ran",
+                            "Field": "nitr_ran", 
                             "Method": "IDW"
                         };
 
                         console.log("Submitting Job...");
-                        // Submit the GP job
-                        const gpJob = await geoprocessor.submitJob(params);
-                        console.log("GP Job Submitted:", gpJob);
+                        geoprocessor.submitJob(gpServiceUrl, params).then((jobInfo) => {
+                            const jobid = jobInfo.jobId;
+                            console.log("ArcGIS Server job ID: ", jobInfo.jobId);
+                            // console.log("GP Job Submitted:", gpJob);
 
-                        // Wait for the job to complete
-                        const jobId = gpJob.jobId;
-                        const jobStatus = await geoprocessor.waitForJobCompletion(jobId);
-                        console.log("GP Job Completed:", jobStatus);
+                            const options = {
+                                interval: 1000,
+                                statusCallback: (j) => {
+                                    console.log("Job Status:", j.jobStatus);
+                                }
+                            };
+                            jobInfo.waitForJobCompletion(options).then(() => {
+                                const layer = jobInfo.getResultData("OutputRaster");
+                                console.log("IDW Interpolation Result:", layer);
+                                map.add(layer);
+                            }).catch((error) => {
+                                console.error("Error waiting for GP job completion:", error);
+                            });
+                        }).catch((error) => {
+                            console.error("Error submitting GP job:", error);
+                        });
 
-                        // Retrieve the output raster
-                        const result = await geoprocessor.getResultData(jobId, "OutputRaster");
-                        console.log("IDW Interpolation Result:", result);
-
-                        // Add the raster to the map
-                        if (result && result.value) {
-                            map.add(result.value);
-                        } else {
-                            console.error("No output raster found.");
-                        }
-
-                    } catch (error) {
-                        console.error("Error running IDW interpolation:", error);
-                    }
                 }
+                catch (error) {
+                    console.error("Error running IDW interpolation:", error);
+                }
+            }
 
                 // Step 5: Run the interpolation when the view loads
                 view.when(() => {
                     runIDWInterpolation();
                 });
-
+                
             }).catch((err) => {
                 console.error("OAuth Authentication Failed:", err);
             });
