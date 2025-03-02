@@ -92,29 +92,33 @@
                         };
 
                         console.log("Submitting Job...");
-                        // Submit the GP job
-                        const gpJob = await geoprocessor.submitJob(gpServiceUrl, params);
-                        console.log("GP Job Submitted:", gpJob);
+                        geoprocessor.submitJob(gpServiceUrl, params).then((jobInfo) => {
+                            const jobid = jobInfo.jobId;
+                            console.log("ArcGIS Server job ID: ", jobInfo.jobId);
+                            // console.log("GP Job Submitted:", gpJob);
 
-                        // Wait for the job to complete
-                        await geoprocessor.waitForJobCompletion(gpServiceUrl, gpJob.jobId);
-                        console.log("GP Job Completed:", gpJob.jobId);
+                            const options = {
+                                interval: 1000,
+                                statusCallback: (j) => {
+                                    console.log("Job Status:", j.jobStatus);
+                                }
+                            };
+                            jobInfo.waitForJobCompletion(options).then(() => {
+                                const layer = jobInfo.getResultData("OutputRaster");
+                                console.log("IDW Interpolation Result:", layer);
+                                map.add(layer);
+                            }).catch((error) => {
+                                console.error("Error waiting for GP job completion:", error);
+                            });
+                        }).catch((error) => {
+                            console.error("Error submitting GP job:", error);
+                        });
 
-                        // Retrieve the output raster
-                        const result = await geoprocessor.getResultData(gpServiceUrl, gpJob.jobId, "OutputRaster");
-                        console.log("IDW Interpolation Result:", result);
-
-                        // Add the raster to the map
-                        if (result && result.value) {
-                            map.add(result.value);
-                        } else {
-                            console.error("No output raster found.");
-                        }
-
-                    } catch (error) {
-                        console.error("Error running IDW interpolation:", error);
-                    }
                 }
+                catch (error) {
+                    console.error("Error running IDW interpolation:", error);
+                }
+            }
 
                 // Step 5: Run the interpolation when the view loads
                 view.when(() => {
